@@ -5,9 +5,9 @@ import pandas as pd
 
 df = pd.read_csv('heart.csv')
 
-print("First 5 rows of the dataset:")
+#print("First 5 rows of the dataset:")
 #print(df.head())
-print("\nDataset Columns:")
+#print("\nDataset Columns:")
 #print(df.columns)    
 
 
@@ -45,4 +45,15 @@ print(df.describe())
 
 male_percentage = df['sex'].mean() * 100
 print(f"Percentage of males: {male_percentage:.2f}%")
+
+# Checking for missing values
+
+n_rows = len(df)
+null_counts = df.isna().sum()
+null_percentages = (null_counts / n_rows) * 100
+print("\nMissing Values per Column:")
+print(null_counts)
+print("\nPercentage of Missing Values per Column:")
+print(null_percentages.round(2))
+
 
