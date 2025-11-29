@@ -46,7 +46,7 @@ print(df.describe())
 male_percentage = df['sex'].mean() * 100
 print(f"Percentage of males: {male_percentage:.2f}%")
 
-# Checking for missing values
+# Checking for null values
 
 n_rows = len(df)
 null_counts = df.isna().sum()
@@ -55,5 +55,42 @@ print("\nMissing Values per Column:")
 print(null_counts)
 print("\nPercentage of Missing Values per Column:")
 print(null_percentages.round(2))
+# In this dataset, there are no null values in any column.
 
 
+# Detecting hidden missing values or incorrect encodings
+
+print("\nUnique values per column:")
+for col in df.columns:
+    print(f"{col}: {df[col].unique()}")
+
+
+# 'thal' should only contain values 1, 2, or 3
+# 'ca' should only contain values 0, 1, 2, or 3
+
+invalid_thal = df[~df['thal'].isin([1,2,3])]
+invalid_ca = df[~df['ca'].isin([0,1,2,3])]
+print("\nRows with invalid 'thal' values:")
+print(len(invalid_thal))
+print("\nRows with invalid 'ca' values:")
+print(len(invalid_ca))
+
+#Converting 'thal' and 'ca' to numeric, forcing errors to NaN
+
+# Replacing encoded missing values / invalid category codes with NaN
+
+df['thal'] = df['thal'].replace(0, np.nan)
+df['ca'] = df['ca'].replace(4, np.nan)
+
+print("\nMissing values AFTER converting invalid codes to NaN:")
+print(df.isna().sum())
+
+
+# Imputing missing values (thal and ca) using mode
+
+
+df['thal'] = df['thal'].fillna(df['thal'].mode()[0])
+df['ca'] = df['ca'].fillna(df['ca'].mode()[0])
+
+print("\nMissing values AFTER imputing mode values:")
+print(df.isna().sum())
