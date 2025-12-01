@@ -111,3 +111,10 @@ for col in numerical_cols:
     if len(outliers) > 0:
         print(outliers[[col]])
 # Note: In this dataset, outliers are not removed as they may represent valid variations in medical data.
+
+
+# Separating features and target variable
+X = df.drop('target', axis=1)
+y = df['target']
+print("\nFeatures (X) shape:", X.shape)
+print("Target (y) shape:", y.shape)
