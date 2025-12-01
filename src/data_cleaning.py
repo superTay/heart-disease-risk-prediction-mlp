@@ -94,3 +94,20 @@ df['ca'] = df['ca'].fillna(df['ca'].mode()[0])
 
 print("\nMissing values AFTER imputing mode values:")
 print(df.isna().sum())
+
+# Outlier detection using IQR method
+def detect_outliers_iqr(dataframe, column):
+    Q1 = dataframe[column].quantile(0.25)
+    Q3 = dataframe[column].quantile(0.75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    outliers = dataframe[(dataframe[column] < lower_bound) | (dataframe[column] > upper_bound)]
+    return outliers 
+numerical_cols = df.select_dtypes(include=[np.number]).columns.tolist()
+for col in numerical_cols:
+    outliers = detect_outliers_iqr(df, col)
+    print(f"\nNumber of outliers detected in '{col}': {len(outliers)}")
+    if len(outliers) > 0:
+        print(outliers[[col]])
+# Note: In this dataset, outliers are not removed as they may represent valid variations in medical data.
