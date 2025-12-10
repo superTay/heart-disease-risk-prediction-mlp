@@ -34,3 +34,11 @@ optimizer = OptimizerAdam(
 
 print("Model components instantiated successfully.")
 print(f"Input features: {n_features}, Output classes: {n_classes}")
+
+
+# --- One-Hot Encoding for labels (y) ---
+# Convert integer labels (0 or 1) into one-hot encoded vectors
+y_one_hot = np.eye(n_classes)[y]
+
+print("One-hot encoding completed. Sample:")
+print(y[:5], "→", y_one_hot[:5])
