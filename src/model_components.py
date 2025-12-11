@@ -273,3 +273,47 @@ class OptimizerAdam:
         Should be called after all parameter updates in a training step.
         """
         self.iterations += 1
+
+class Dropout:
+    """
+    Dropout layer for regularization.
+    Randomly drops a fraction of neurons during training to prevent overfitting.
+    
+    Parameters
+    ----------
+    rate : float
+        Fraction of neurons to drop (e.g., 0.2 means drop 20% of neurons).
+    """
+
+    def __init__(self, rate: float):
+        self.rate = rate
+
+    def forward(self, inputs: np.ndarray, training: bool):
+        """
+        Forward pass with dropout.
+        During training: randomly zeroes neurons and scales remaining ones.
+        During inference: dropout disabled (output = inputs).
+
+        Parameters
+        ----------
+        inputs : np.ndarray
+            Activations from the previous layer.
+        training : bool
+            Whether the model is in training mode.
+        """
+        self.inputs = inputs
+
+        if not training:
+            self.output = inputs
+            return
+
+        # Create dropout mask (0 = dropped, 1/(1-rate) = kept)
+        self.mask = (np.random.rand(*inputs.shape) > self.rate) / (1 - self.rate)
+        self.output = inputs * self.mask
+
+    def backward(self, dvalues: np.ndarray):
+        """
+        Backward pass through dropout.
+        Only neurons that were active during the forward pass receive gradients.
+        """
+        self.dinputs = dvalues * self.mask
