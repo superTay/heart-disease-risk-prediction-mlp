@@ -4,7 +4,8 @@ Model Evaluation Module
 
 This script evaluates the neural network using a 5-fold cross-validation
 pipeline. For each fold, the model is re-instantiated, trained from scratch
-on the corresponding training split, and evaluated on the validation split.
+on the corresponding training split (with dropout regularization),
+and evaluated on the validation split.
 
 The evaluation includes:
 - Accuracy
@@ -17,8 +18,8 @@ The evaluation includes:
 A final summary reports the mean and standard deviation of each metric across folds,
 providing a robust estimate of the model's generalization performance.
 
-This module follows a professional ML workflow and is intended for portfolio-quality
-model validation.
+ROC curve data (FPR/TPR per fold) is also exported to an NPZ file so that
+it can be visualized later (e.g. in a Streamlit app).
 """
 
 import numpy as np
@@ -39,6 +40,7 @@ from data_cleaning import X, y
 from model_components import (
     DenseLayer,
     ActivationReLU,
+    Dropout,
     ActivationSoftmaxLossCategoricalCrossentropy,
     OptimizerAdam,
 )
@@ -80,7 +82,6 @@ assert len(np.unique(all_test_indices)) == X.shape[0], \
     "Some samples appear multiple times in test folds."
 
 print("K-Fold integrity check passed ✅")
-
 
 # ------------------------------------------------------------------
 #         TRAIN & EVALUATE MODEL IN EACH K-FOLD
@@ -127,16 +128,18 @@ for train_index, test_index in kf.split(X):
     # Re-instantiate model for each fold (very important)
     layer1 = DenseLayer(n_inputs=n_features, n_neurons=16)
     activation1 = ActivationReLU()
+    dropout1 = Dropout(rate=0.2)  # Dropout layer for regularization
     layer2 = DenseLayer(n_inputs=16, n_neurons=n_classes)
     loss_activation = ActivationSoftmaxLossCategoricalCrossentropy()
     optimizer = OptimizerAdam(learning_rate=0.001, decay=1e-3)
 
     # -------- TRAINING LOOP FOR THIS FOLD --------
     for epoch in range(epochs):
-        # Forward pass
+        # Forward pass (train mode)
         layer1.forward(X_train)
         activation1.forward(layer1.output)
-        layer2.forward(activation1.output)
+        dropout1.forward(activation1.output, training=True)
+        layer2.forward(dropout1.output)
         loss = loss_activation.forward(layer2.output, y_train)
 
         # Predictions & accuracy (train)
@@ -146,7 +149,8 @@ for train_index, test_index in kf.split(X):
         # Backward pass
         loss_activation.backward(loss_activation.output, y_train)
         layer2.backward(loss_activation.dinputs)
-        activation1.backward(layer2.dinputs)
+        dropout1.backward(layer2.dinputs)
+        activation1.backward(dropout1.dinputs)
         layer1.backward(activation1.dinputs)
 
         # Update weights
@@ -165,7 +169,11 @@ for train_index, test_index in kf.split(X):
     # Forward pass on test data
     layer1.forward(X_test)
     activation1.forward(layer1.output)
-    layer2.forward(activation1.output)
+
+    # No dropout during validation/testing: full network is used
+    dropout1.forward(activation1.output, training=False)
+
+    layer2.forward(dropout1.output)
     test_loss = loss_activation.forward(layer2.output, y_test)
 
     # Predicted class labels
@@ -232,10 +240,6 @@ summarize_metric("ROC-AUC", fold_aucs)
 # ----------------------------------------------------------
 #   SAVE ROC CURVE DATA FOR LATER VISUALIZATION (e.g. Streamlit)
 # ----------------------------------------------------------
-
-# Note:
-# We store FPR and TPR arrays for each fold in a compressed NumPy file.
-# A Streamlit app can later load this file and plot all ROC curves.
 
 np.savez(
     "roc_curves.npz",
