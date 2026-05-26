@@ -85,7 +85,7 @@ def show():
         st.session_state["df_fil"] = df_fil
 
         st.success(f"✅ {len(df_fil):,} patients match the filters.")
-        st.dataframe(df_fil.head(10), use_container_width=True)
+        st.dataframe(df_fil.head(10), width="stretch")
     else:
         st.info("Adjust filters and click **Apply filters** to update the view.")
 
@@ -148,6 +148,6 @@ def show():
             return fig
 
         fig = generate_plot(df_fil, plot_type, x_col, y_col, color_col)
-        fig_container.plotly_chart(fig, use_container_width=True)
+        fig_container.plotly_chart(fig, width="stretch")
     else:
         st.info("No filtered data available. Apply filters to generate charts.")

@@ -64,7 +64,7 @@ def show():
         template="plotly_white",
         height=400,
     )
-    st.plotly_chart(fig_loss, use_container_width=True)
+    st.plotly_chart(fig_loss, width="stretch")
 
     # Accuracy
     fig_acc = go.Figure()
@@ -81,7 +81,7 @@ def show():
         template="plotly_white",
         height=400,
     )
-    st.plotly_chart(fig_acc, use_container_width=True)
+    st.plotly_chart(fig_acc, width="stretch")
 
     st.markdown(
         """
@@ -135,7 +135,7 @@ a well-regularized neural network (Dropout + Adam with decay).
         height=500,
     )
 
-    st.plotly_chart(fig_roc, use_container_width=True)
+    st.plotly_chart(fig_roc, width="stretch")
 
     st.markdown(
         """

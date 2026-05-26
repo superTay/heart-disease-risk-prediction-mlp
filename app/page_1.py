@@ -44,15 +44,15 @@ def show():
     col3.metric("Disease prevalence", f"{disease_rate*100:.1f}%")
 
     st.markdown("### 🔍 Sample of the cleaned dataset")
-    st.dataframe(df.head(10), use_container_width=True)
+    st.dataframe(df.head(10), width="stretch")
 
     # --- Basic info / describe ---
     with st.expander("ℹ️ Dataset technical summary"):
         st.write("**Column types**")
-        st.write(pd.DataFrame(df.dtypes, columns=["dtype"]))
+        st.write(pd.DataFrame(df.dtypes.astype(str), columns=["dtype"]))
 
         st.write("**Statistical summary (numeric features)**")
-        st.dataframe(df.describe().T, use_container_width=True)
+        st.dataframe(df.describe().T, width="stretch")
 
     # --- Feature dictionary ---
     with st.expander("📚 Feature dictionary (human-readable descriptions)", expanded=True):
@@ -66,4 +66,4 @@ def show():
                 }
             )
         dict_df = pd.DataFrame(rows)
-        st.dataframe(dict_df, use_container_width=True)
+        st.dataframe(dict_df, width="stretch")
